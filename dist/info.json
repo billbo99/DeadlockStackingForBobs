@@ -1,0 +1,33 @@
+{
+    "name": "DeadlockStackingForBobs",
+    "version": "1.1.0",
+    "factorio_version": "1.1",
+    "title": "Deadlock Stacking For Bobs",
+    "author": "billbo99",
+    "homepage": "",
+    "dependencies": [
+        "base",
+        "deadlock-beltboxes-loaders >= 2.4.0",
+        "rusty-locale",
+        "?deadlock-integrations",
+        "?boblogistics-belt-reskin",
+        "?bobassembly",
+        "?bobelectronics",
+        "?bobenemies",
+        "?bobequipment",
+        "?bobgreenhouse",
+        "?bobinserters",
+        "?boblogistics",
+        "?bobmining",
+        "?bobmodules",
+        "?bobpower",
+        "?bobrevamp",
+        "?bobtech",
+        "?bobwarfare",
+        "?ShinyBobGFX",
+        "?reskins-bobs",
+        "?bobplates",
+        "?bobores"
+    ],
+    "description": "Add stacked items for Bob's"
+}

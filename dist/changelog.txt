@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.0.6
+Date: 2020.08.03
+  Changes:
+    - Bug fixes found by Rachmaninov
+---------------------------------------------------------------------------------------------------
+Version: 0.0.5
+Date: 2020.07.23
+  Changes:
+    - Bug fixes for when combined with my Angles stacking mod
+---------------------------------------------------------------------------------------------------
+Version: 0.0.4
+Date: 2020.07.23
+  Changes:
+    - Bug fixes for early stacked recipes
+---------------------------------------------------------------------------------------------------
+Version: 0.0.3
+Date: 2020.07.22
+  Changes:
+    - Added more items so science can be created in stacked form
+---------------------------------------------------------------------------------------------------
+Version: 0.0.2
+Date: 2020.07.17
+  Changes:
+    - Copper plate stacking was under wrong tech
+---------------------------------------------------------------------------------------------------
+Version: 0.0.1
+Date: 2020.07.14
+  Features:
+    - First cut
+    - Todo .. pre-generate stacked icons
