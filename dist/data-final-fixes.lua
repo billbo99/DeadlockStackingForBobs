@@ -145,6 +145,7 @@ local function main()
             log("not found ... data.raw[" .. item_type .. "][" .. name .. "]")
         end
     end
+    deadlock.deferred_stacked_item_updates()
 end
 
 walk_technology()
