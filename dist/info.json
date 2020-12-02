@@ -1,13 +1,13 @@
 {
     "name": "DeadlockStackingForBobs",
-    "version": "1.1.0",
-    "factorio_version": "1.1",
+    "version": "1.0.1",
+    "factorio_version": "1.0",
     "title": "Deadlock Stacking For Bobs",
     "author": "billbo99",
     "homepage": "",
     "dependencies": [
         "base",
-        "deadlock-beltboxes-loaders >= 2.4.0",
+        "deadlock-beltboxes-loaders",
         "rusty-locale",
         "?deadlock-integrations",
         "?boblogistics-belt-reskin",
