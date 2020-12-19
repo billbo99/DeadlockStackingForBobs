@@ -1,4 +1,44 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.5
+Date: 2020-12-19
+  Bugfixes:
+    - Added a dependency check on CircuitProcessing, to ensure loading order
+---------------------------------------------------------------------------------------------------
+Version: 1.0.5
+Date: 2020-12-19
+  Bugfixes:
+    - Added a dependency check on CircuitProcessing, to ensure loading order
+---------------------------------------------------------------------------------------------------
+Version: 1.1.4
+Date: 2020-12-16
+  Bugfixes:
+    - Added a check to validate a technology existed before trying to added a stacked item to it
+---------------------------------------------------------------------------------------------------
+Version: 1.0.4
+Date: 2020-12-16
+  Bugfixes:
+    - Added a check to validate a technology existed before trying to added a stacked item to it
+---------------------------------------------------------------------------------------------------
+Version: 1.1.3
+Date: 2020-12-10
+  Bugfixes:
+    - Changed code to run in   data-update  phase
+---------------------------------------------------------------------------------------------------
+Version: 1.0.3
+Date: 2020-12-10
+  Bugfixes:
+    - Changed code to run in   data-update  phase
+---------------------------------------------------------------------------------------------------
+Version: 1.1.2
+Date: 2020-12-10
+  Bugfixes:
+    - Mining drones were not seeing stacked ores
+---------------------------------------------------------------------------------------------------
+Version: 1.0.2
+Date: 2020-12-10
+  Bugfixes:
+    - Mining drones were not seeing stacked ores
+---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Date: 2020-12-02
   Bugfixes:

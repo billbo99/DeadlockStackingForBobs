@@ -49,10 +49,6 @@ local function walk_technology()
 end
 
 local function walk_recipes()
-    if not data.raw.recipe[default_beltbox] then
-        default_beltbox = "deadlock-stacking-1"
-    end
-
     for _, recipe in pairs(data.raw.recipe) do
         local main_product = rusty_recipes.get_main_product(recipe)
         if main_product then
@@ -115,6 +111,10 @@ local function main()
         local techs = {}
         local item_type = "item"
 
+        if item.tech == "DEFAULT" then
+            item.tech = default_beltbox
+        end
+
         if tech_by_product[name] then
             techs = dedup_list(tech_by_product[name].tech)
             item_type = tech_by_product[name].type or "item"
@@ -126,14 +126,14 @@ local function main()
             item_type = item.type
         end
 
-        log(string.format("%s -- %s", item_type, name))
-        if data.raw[item_type] and data.raw[item_type][name] then
-            if data.raw.item["deadlock-stack-" .. name] then
-                deadlock.destroy_stack(name)
-            end
+        if data.raw[item_type] and data.raw[item_type][name] and data.raw.technology[techs[1]] then
+            -- if data.raw.item["deadlock-stack-" .. name] then
+            --     deadlock.destroy_stack(name)
+            -- end
 
-            log(string.format("%s -- %s", name, techs[1]))
-            if data.raw.technology[techs[1]] then
+            if data.raw.item["deadlock-stack-" .. name] then
+                add_item_to_tech(name, techs[1])
+            else
                 deadlock.add_stack(name, icon, techs[1], icon_size, item_type)
                 if #techs > 1 then
                     for i = 2, #techs do
@@ -145,7 +145,11 @@ local function main()
             log("not found ... data.raw[" .. item_type .. "][" .. name .. "]")
         end
     end
-    deadlock.deferred_stacked_item_updates()
+    -- deadlock.deferred_stacked_item_updates()
+end
+
+if not data.raw.recipe[default_beltbox] then
+    default_beltbox = "deadlock-stacking-1"
 end
 
 walk_technology()
