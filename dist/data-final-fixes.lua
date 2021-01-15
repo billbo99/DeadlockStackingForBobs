@@ -131,10 +131,6 @@ local function main()
         end
 
         if data.raw[item_type] and data.raw[item_type][name] and data.raw.technology[techs[1]] then
-            -- if item.restack then
-            --     deadlock.destroy_stack(name)
-            -- end
-
             if data.raw.item["deadlock-stack-" .. name] then
                 add_item_to_tech(name, techs[1])
             else
@@ -209,21 +205,31 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
                 last_icon = {icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-d-64.png", icon_size = 64, scale = 0.25}
             end
             if parent and parent.icon then
-                if string.find(parent.icon, "__bob") then
+                if string.find(parent.icon, "__bob") or string.find(parent.icon, "__reskin") or (Items[parent.name] and Items[parent.name].reskin) then
+                    local shifts = {
+                        {{0, 3}, {0, 0}, {0, -3}}, -- default
+                        {{-3, -3}, {0, 0}, {3, 3}} -- diag - top left to bottom right
+                    }
+                    local shift = shifts[1]
+                    if Items[parent.name] and Items[parent.name].reskin_mode then
+                        shift = shifts[Items[parent.name].reskin_mode]
+                    end
+
                     if not string.find(recipe_table.icons[1].icon, "blank.png") then
                         local icons = {{icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1}}
-                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, 3}})
-                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, 0}})
-                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, -3}})
+
+                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1]})
+                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2]})
+                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[3]})
                         table.insert(icons, last_icon)
                         recipe_table.icons = icons
 
                         if starts_with(recipe, "deadlock-stacks-stack-") then
                             local stacked_icon = data.raw.item[recipe_table.result]
                             icons = {{icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1}}
-                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, 3}})
-                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, 0}})
-                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, -3}})
+                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1]})
+                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2]})
+                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[3]})
 
                             stacked_icon.icons = icons
                         end
