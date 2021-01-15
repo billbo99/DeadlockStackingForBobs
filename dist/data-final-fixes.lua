@@ -5,6 +5,7 @@ end
 local rusty_locale = require "__rusty-locale__.locale"
 local rusty_icons = require "__rusty-locale__.icons"
 local rusty_recipes = require "__rusty-locale__.recipes"
+local rusty_prototypes = require "__rusty-locale__.prototypes"
 
 local Items = require("migrations.items").items
 local default_beltbox = "basic-transport-belt-beltbox"
@@ -118,6 +119,9 @@ local function main()
         if tech_by_product[name] then
             techs = dedup_list(tech_by_product[name].tech)
             item_type = tech_by_product[name].type or "item"
+            if item.force_tech then
+                table.insert(techs, item.tech)
+            end
         else
             techs = {item.tech}
         end
@@ -127,7 +131,7 @@ local function main()
         end
 
         if data.raw[item_type] and data.raw[item_type][name] and data.raw.technology[techs[1]] then
-            -- if data.raw.item["deadlock-stack-" .. name] then
+            -- if item.restack then
             --     deadlock.destroy_stack(name)
             -- end
 
@@ -135,10 +139,10 @@ local function main()
                 add_item_to_tech(name, techs[1])
             else
                 deadlock.add_stack(name, icon, techs[1], icon_size, item_type)
-                if #techs > 1 then
-                    for i = 2, #techs do
-                        add_item_to_tech(name, techs[i])
-                    end
+            end
+            if #techs > 1 then
+                for i = 2, #techs do
+                    add_item_to_tech(name, techs[i])
                 end
             end
         else
@@ -171,25 +175,7 @@ local function multiply_number_unit(property, mult)
     end
 end
 
--- Angles does some processing at in the  data-final-fixes to change ingredients of recipes,  need to update stacking/unstacking recipes to follow suit
--- for recipe, recipe_table in pairs(data.raw.recipe) do
---     if starts_with(recipe, "deadlock-stacks-stack-") then
---         log(serpent.block(recipe_table))
---         local src = recipe_table.ingredients[1].name or recipe_table.ingredients[1][1] or nil
---         if recipe_table.result ~= "deadlock-stack-" .. src and data.raw.item["deadlock-stack-" .. src] then
---             recipe_table.result = "deadlock-stack-" .. src
---         end
---     end
---     if starts_with(recipe, "deadlock-stacks-unstack-") then
---         local src = recipe_table.ingredients[1].name or recipe_table.ingredients[1][1] or nil
---         local item_type = recipe_table.ingredients[1].type or "item"
---         if src ~= "deadlock-stack-" .. recipe_table.result and data.raw[item_type][string.sub(src, 16)] then
---             recipe_table.result = string.sub(src, 16)
---         end
---     end
--- end
-
--- lastly fix any fuel values
+-- fix any fuel values
 local deadlock_stack_size = settings.startup["deadlock-stack-size"].value
 for item, item_table in pairs(data.raw.item) do
     if starts_with(item, "deadlock-stack-") then
@@ -204,6 +190,45 @@ for item, item_table in pairs(data.raw.item) do
 
             if parent.burnt_result and data.raw.item["deadlock-stack-" .. parent.burnt_result] then
                 item_table.burnt_result = "deadlock-stack-" .. parent.burnt_result
+            end
+        end
+    end
+end
+
+for recipe, recipe_table in pairs(data.raw.recipe) do
+    if starts_with(recipe, "deadlock-stacks-stack-") or starts_with(recipe, "deadlock-stacks-unstack-") then
+        if recipe_table.icons then
+            local parent, last_icon
+            if starts_with(recipe, "deadlock-stacks-stack-") then
+                local x = rusty_prototypes.find_by_name(string.sub(recipe_table.result, 16))
+                parent = x.item or x.module or x.tool or nil
+                last_icon = {icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-u-64.png", icon_size = 64, scale = 0.25}
+            else
+                local x = rusty_prototypes.find_by_name(recipe_table.result)
+                parent = x.item or x.module or x.tool or nil
+                last_icon = {icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-d-64.png", icon_size = 64, scale = 0.25}
+            end
+            if parent and parent.icon then
+                if string.find(parent.icon, "__bob") then
+                    if not string.find(recipe_table.icons[1].icon, "blank.png") then
+                        local icons = {{icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1}}
+                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, 3}})
+                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, 0}})
+                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, -3}})
+                        table.insert(icons, last_icon)
+                        recipe_table.icons = icons
+
+                        if starts_with(recipe, "deadlock-stacks-stack-") then
+                            local stacked_icon = data.raw.item[recipe_table.result]
+                            icons = {{icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1}}
+                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, 3}})
+                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, 0}})
+                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = {0, -3}})
+
+                            stacked_icon.icons = icons
+                        end
+                    end
+                end
             end
         end
     end
