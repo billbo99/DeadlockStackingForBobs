@@ -175,7 +175,6 @@ end
 local deadlock_stack_size = settings.startup["deadlock-stack-size"].value
 for item, item_table in pairs(data.raw.item) do
     if starts_with(item, "deadlock-stack-") then
-        log(serpent.block(recipe_table))
         local parent = data.raw.item[string.sub(item, 16)]
         if parent and parent.fuel_value then
             item_table.fuel_value = multiply_number_unit(parent.fuel_value, deadlock_stack_size)
@@ -197,6 +196,7 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
             local parent, last_icon
             if starts_with(recipe, "deadlock-stacks-stack-") then
                 local x = rusty_prototypes.find_by_name(string.sub(recipe_table.result, 16))
+                -- localised_name = {"item-name.deadlock-stacking-stack", get_localised_name(item_name), stack_size}
                 parent = x.item or x.module or x.tool or nil
                 last_icon = {icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-u-64.png", icon_size = 64, scale = 0.25}
             else
@@ -236,6 +236,24 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
                     end
                 end
             end
+        end
+    end
+end
+
+for item, item_table in pairs(data.raw.item) do
+    if starts_with(item, "deadlock-stack-") then
+        local parent = data.raw.item[string.sub(item, 16)]
+        if parent then
+            local locale = rusty_locale.of(parent)
+            item_table.localised_name[2] = locale.name
+            if data.raw.recipe["deadlock-stacks-stack-" .. parent.name] then
+                data.raw.recipe["deadlock-stacks-stack-" .. parent.name].localised_name[2] = locale.name
+            end
+            if data.raw.recipe["deadlock-stacks-unstack-" .. parent.name] then
+                data.raw.recipe["deadlock-stacks-unstack-" .. parent.name].localised_name[2] = locale.name
+            end
+        else
+            log(string.sub(item, 16) .. " missing")
         end
     end
 end
