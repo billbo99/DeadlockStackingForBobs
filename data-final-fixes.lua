@@ -78,7 +78,7 @@ local function walk_recipes()
                     end
                 end
             else
-                log("hmm2 .. " .. recipe.name)
+                log("hmm2 .. " .. resource.name)
             end
         end
     end
@@ -195,7 +195,16 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
         if recipe_table.icons then
             local parent, last_icon
             if starts_with(recipe, "deadlock-stacks-stack-") then
-                local x = rusty_prototypes.find_by_name(string.sub(recipe_table.result, 16))
+                local x
+                if recipe_table.result then
+                    x = rusty_prototypes.find_by_name(string.sub(recipe_table.result, 16))
+                elseif recipe_table.results then
+                    x = rusty_prototypes.find_by_name(string.sub(recipe_table.results[1].name, 16))
+                elseif recipe_table.normal and recipe_table.normal.result then
+                    x = rusty_prototypes.find_by_name(string.sub(recipe_table.normal.result, 16))
+                elseif recipe_table.normal and recipe_table.normal.results then
+                    x = rusty_prototypes.find_by_name(string.sub(recipe_table.normal.results[1].name, 16))
+                end
                 -- localised_name = {"item-name.deadlock-stacking-stack", get_localised_name(item_name), stack_size}
                 parent = x.item or x.module or x.tool or nil
                 last_icon = {icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-u-64.png", icon_size = 64, scale = 0.25}
@@ -225,7 +234,16 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
                         recipe_table.icons = icons
 
                         if starts_with(recipe, "deadlock-stacks-stack-") then
-                            local stacked_icon = data.raw.item[recipe_table.result]
+                            local stacked_icon
+                            if recipe_table.result then
+                                stacked_icon = data.raw.item[recipe_table.result]
+                            elseif recipe_table.results then
+                                stacked_icon = data.raw.item[recipe_table.results[1].name]
+                            elseif recipe_table.normal and recipe_table.normal.result then
+                                stacked_icon = data.raw.item[recipe_table.normal.result]
+                            elseif recipe_table.normal and recipe_table.normal.results then
+                                stacked_icon = data.raw.item[recipe_table.normal.results[1].name]
+                            end
                             icons = {{icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1}}
                             table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1]})
                             table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2]})
