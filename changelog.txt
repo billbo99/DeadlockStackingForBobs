@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.4
+Date: 2023.09.16
+  Changes:
+    - Add setting to allow stacking of items that are not main_products of a recipe.  Could be useful when playing with Omni+Bobs
+---------------------------------------------------------------------------------------------------
 Version: 1.2.3
 Date: 2023.01.19
   Bugfixes:

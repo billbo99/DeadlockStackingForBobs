@@ -27,6 +27,23 @@ local function dedup_list(data)
     return res
 end
 
+local function add_item_to_tech_by_product(name, tech_name)
+    if not tech_by_product[name] then
+        tech_by_product[name] = { type = type, tech = {} }
+    end
+    if tech_name == default_beltbox or starts_with(tech_name, "deadlock-stacking-") then
+        -- skipping beltbox technology
+    else
+        table.insert(tech_by_product[name].tech, tech_name)
+    end
+end
+
+local function parse_products_and_add_to_tech_by_product(data, tech_name)
+    for k, v in pairs(data) do
+        if v.name then add_item_to_tech_by_product(v.name, tech_name) end
+    end
+end
+
 local function walk_technology()
     for _, tech in pairs(data.raw.technology) do
         if tech.effects then
@@ -35,12 +52,19 @@ local function walk_technology()
                     local main_product = rusty_recipes.get_main_product(data.raw.recipe[effect.recipe])
                     if main_product then
                         if not tech_by_product[main_product.name] then
-                            tech_by_product[main_product.name] = {type = main_product.type, tech = {}}
+                            tech_by_product[main_product.name] = { type = main_product.type, tech = {} }
                         end
                         if tech.name == default_beltbox or starts_with(tech.name, "deadlock-stacking-") then
                             -- skipping beltbox technology
                         else
                             table.insert(tech_by_product[main_product.name].tech, tech.name)
+                        end
+                    else
+                        if settings.startup["dsfb_non_main_product"] and settings.startup["dsfb_non_main_product"].value then
+                            local recipe = data.raw.recipe[effect.recipe]
+                            if recipe.results then parse_products_and_add_to_tech_by_product(recipe.results, tech.name) end
+                            if recipe.normal and recipe.normal.results then parse_products_and_add_to_tech_by_product(recipe.normal.results, tech.name) end
+                            if recipe.expensive and recipe.expensive.results then parse_products_and_add_to_tech_by_product(recipe.expensive.results, tech.name) end
                         end
                     end
                 end
@@ -54,7 +78,7 @@ local function walk_recipes()
         local main_product = rusty_recipes.get_main_product(recipe)
         if main_product then
             if not tech_by_product[main_product.name] then
-                tech_by_product[main_product.name] = {type = main_product.type, tech = {}}
+                tech_by_product[main_product.name] = { type = main_product.type, tech = {} }
                 table.insert(tech_by_product[main_product.name].tech, default_beltbox)
             end
         else
@@ -65,14 +89,14 @@ local function walk_recipes()
         if resource.minable then
             if resource.minable.result then
                 if not tech_by_product[resource.minable.result] then
-                    tech_by_product[resource.minable.result] = {type = resource.minable.result.type or "item", tech = {}}
+                    tech_by_product[resource.minable.result] = { type = resource.minable.result.type or "item", tech = {} }
                 end
                 table.insert(tech_by_product[resource.minable.result].tech, default_beltbox)
             elseif resource.minable.results then
                 for _, result in pairs(resource.minable.results) do
                     if result.type == "item" then
                         if not tech_by_product[result.name] then
-                            tech_by_product[result.name] = {type = result.type, tech = {}}
+                            tech_by_product[result.name] = { type = result.type, tech = {} }
                             table.insert(tech_by_product[result.name].tech, default_beltbox)
                         end
                     end
@@ -97,10 +121,10 @@ local function add_item_to_tech(name, tech)
         end
     end
     if not recipes[string.format("deadlock-stacks-stack-%s", name)] then
-        table.insert(data.raw.technology[tech].effects, {type = "unlock-recipe", recipe = string.format("deadlock-stacks-stack-%s", name)})
+        table.insert(data.raw.technology[tech].effects, { type = "unlock-recipe", recipe = string.format("deadlock-stacks-stack-%s", name) })
     end
     if not recipes[string.format("deadlock-stacks-unstack-%s", name)] then
-        table.insert(data.raw.technology[tech].effects, {type = "unlock-recipe", recipe = string.format("deadlock-stacks-unstack-%s", name)})
+        table.insert(data.raw.technology[tech].effects, { type = "unlock-recipe", recipe = string.format("deadlock-stacks-unstack-%s", name) })
     end
 end
 
@@ -123,7 +147,7 @@ local function main()
                 table.insert(techs, item.tech)
             end
         else
-            techs = {item.tech}
+            techs = { item.tech }
         end
 
         if item.type then
@@ -207,17 +231,17 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
                 end
                 -- localised_name = {"item-name.deadlock-stacking-stack", get_localised_name(item_name), stack_size}
                 parent = x.item or x.module or x.tool or nil
-                last_icon = {icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-u-64.png", icon_size = 64, scale = 0.25}
+                last_icon = { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-u-64.png", icon_size = 64, scale = 0.25 }
             else
                 local x = rusty_prototypes.find_by_name(recipe_table.result)
                 parent = x.item or x.module or x.tool or nil
-                last_icon = {icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-d-64.png", icon_size = 64, scale = 0.25}
+                last_icon = { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-d-64.png", icon_size = 64, scale = 0.25 }
             end
             if parent and parent.icon then
                 if string.find(parent.icon, "__bob") or string.find(parent.icon, "__reskin") or (Items[parent.name] and Items[parent.name].reskin) then
                     local shifts = {
-                        {{0, 3}, {0, 0}, {0, -3}}, -- default
-                        {{-3, -3}, {0, 0}, {3, 3}} -- diag - top left to bottom right
+                        { { 0, 3 },   { 0, 0 }, { 0, -3 } }, -- default
+                        { { -3, -3 }, { 0, 0 }, { 3, 3 } }   -- diag - top left to bottom right
                     }
                     local shift = shifts[1]
                     if Items[parent.name] and Items[parent.name].reskin_mode then
@@ -225,11 +249,11 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
                     end
 
                     if not string.find(recipe_table.icons[1].icon, "blank.png") then
-                        local icons = {{icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1}}
+                        local icons = { { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1 } }
 
-                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1]})
-                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2]})
-                        table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[3]})
+                        table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1] })
+                        table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2] })
+                        table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[3] })
                         table.insert(icons, last_icon)
                         recipe_table.icons = icons
 
@@ -244,10 +268,10 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
                             elseif recipe_table.normal and recipe_table.normal.results then
                                 stacked_icon = data.raw.item[recipe_table.normal.results[1].name]
                             end
-                            icons = {{icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1}}
-                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1]})
-                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2]})
-                            table.insert(icons, {icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[3]})
+                            icons = { { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1 } }
+                            table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1] })
+                            table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2] })
+                            table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[3] })
 
                             stacked_icon.icons = icons
                         end
