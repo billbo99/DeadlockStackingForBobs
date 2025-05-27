@@ -158,6 +158,9 @@ local function main()
             if data.raw.item["deadlock-stack-" .. name] then
                 add_item_to_tech(name, techs[1])
             else
+                if not data.raw[item_type][name].icons and data.raw[item_type][name].icon then
+                    data.raw[item_type][name].icons = { { icon = data.raw[item_type][name].icon, icon_size = data.raw[item_type][name].icon_size or 64 } }
+                end
                 deadlock.add_stack(name, icon, techs[1], icon_size, item_type)
             end
             if #techs > 1 then
@@ -220,20 +223,14 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
             local parent, last_icon
             if starts_with(recipe, "deadlock-stacks-stack-") then
                 local x
-                if recipe_table.result then
-                    x = rusty_prototypes.find_by_name(string.sub(recipe_table.result, 16))
-                elseif recipe_table.results then
+                if recipe_table.results then
                     x = rusty_prototypes.find_by_name(string.sub(recipe_table.results[1].name, 16))
-                elseif recipe_table.normal and recipe_table.normal.result then
-                    x = rusty_prototypes.find_by_name(string.sub(recipe_table.normal.result, 16))
-                elseif recipe_table.normal and recipe_table.normal.results then
-                    x = rusty_prototypes.find_by_name(string.sub(recipe_table.normal.results[1].name, 16))
+                    -- localised_name = {"item-name.deadlock-stacking-stack", get_localised_name(item_name), stack_size}
+                    parent = x.item or x.module or x.tool or nil
+                    last_icon = { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-u-64.png", icon_size = 64, scale = 0.25 }
                 end
-                -- localised_name = {"item-name.deadlock-stacking-stack", get_localised_name(item_name), stack_size}
-                parent = x.item or x.module or x.tool or nil
-                last_icon = { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-u-64.png", icon_size = 64, scale = 0.25 }
             else
-                local x = rusty_prototypes.find_by_name(recipe_table.result)
+                local x = rusty_prototypes.find_by_name(recipe_table.results[1].name)
                 parent = x.item or x.module or x.tool or nil
                 last_icon = { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-d-64.png", icon_size = 64, scale = 0.25 }
             end
@@ -259,21 +256,15 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
 
                         if starts_with(recipe, "deadlock-stacks-stack-") then
                             local stacked_icon
-                            if recipe_table.result then
-                                stacked_icon = data.raw.item[recipe_table.result]
-                            elseif recipe_table.results then
+                            if recipe_table.results then
                                 stacked_icon = data.raw.item[recipe_table.results[1].name]
-                            elseif recipe_table.normal and recipe_table.normal.result then
-                                stacked_icon = data.raw.item[recipe_table.normal.result]
-                            elseif recipe_table.normal and recipe_table.normal.results then
-                                stacked_icon = data.raw.item[recipe_table.normal.results[1].name]
-                            end
-                            icons = { { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1 } }
-                            table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1] })
-                            table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2] })
-                            table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[3] })
+                                icons = { { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1 } }
+                                table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1] })
+                                table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2] })
+                                table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[3] })
 
-                            stacked_icon.icons = icons
+                                stacked_icon.icons = icons
+                            end
                         end
                     end
                 end
