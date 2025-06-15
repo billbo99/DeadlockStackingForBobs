@@ -248,6 +248,10 @@ for recipe, recipe_table in pairs(data.raw.recipe) do
                     if not string.find(recipe_table.icons[1].icon, "blank.png") then
                         local icons = { { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", icon_size = 32, scale = 1 } }
 
+                        if not parent.icon_size then
+                            parent.icon_size = 64
+                        end
+
                         table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[1] })
                         table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[2] })
                         table.insert(icons, { icon = parent.icon, icon_size = parent.icon_size, scale = 0.85 / (parent.icon_size / 32), shift = shift[3] })
